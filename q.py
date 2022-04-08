@@ -1,8 +1,12 @@
-from cuda_test import test_cuda
+import torch
 
 
 def main():
-    pass
+    print(torch.cuda.is_available())
+
+    t = torch.rand(2, 2).cuda()
+    print(t)
+    print(t.device)
 
 
 if __name__ == '__main__':
