@@ -1,42 +1,8 @@
+from abc import abstractmethod
+from turtle import pos
 import numpy as np
 
-
-pieces = {
-    "pawn": 1,      # 🨅
-    "rook": 2,      # 🨂
-    "knight": 3,    # 🨄
-    "bishop": 4,    # 🨃
-    "queen": 5,     # 🨁
-    "king": 6,      # 🨀
-}
-
-pieces_xq = {
-    "soldier": 1,   # 🩦 🩭
-    "cannon": 2,    # 🩥 🩬
-    "chariot": 3,   # 🩤 🩫
-    "horse": 4,     # 🩣 🩪
-    "elephant": 5,  # 🩢 🩩
-    "mandarin": 6,  # 🩡 🩨
-    "general": 7,   # 🩠 🩧
-}
-
-pieces_sg = {
-    "fuhyou": 1,        # 歩兵 P
-    "tokin": 2,         # と金 +P
-    "kyousha": 3,       # 香車 L
-    "narikyou": 4,      # 成香 +L
-    "keima": 5,         # 桂馬 N
-    "narikei": 6,       # 成桂 +N
-    "ginshou": 7,       # 銀將 S
-    "narigin": 8,       # 成銀 +S
-    "kinshou": 9,       # 金將 G
-    "kakugyou": 10,     # 角行 B
-    "ryuuma": 11,       # 龍馬 +B
-    "hisha": 12,        # 飛車 R
-    "ryuuou": 13,       # 龍王 +R
-    "gyokushou": -14,   # 玉將 K
-    "oushou": 14,       # 王將 K
-}
+from pieces import pieces, pieces_sg, pieces_xq
 
 
 def flip_chessboard(cb: np.ndarray):
@@ -45,6 +11,39 @@ def flip_chessboard(cb: np.ndarray):
 
 def rotate_chessboard(cb: np.ndarray):
     return -cb[::-1, ::-1]
+
+
+class BaseChessboard:
+    def __init__(self, cb: np.ndarray) -> None:
+        self.cb = cb
+
+    @abstractmethod
+    def _check_rule(self, position, destination) -> bool:
+        pass
+
+    def move_piece(self, position, destination) -> bool:
+        if not self._check_rule(position, destination):
+            return False
+
+        value = self.cb[position[0], position[1]]
+        self.cb[destination[0], destination[1]] = value
+        self.cb[position[0], position[1]] = 0
+        return True
+
+
+class Chessboard(BaseChessboard):
+    def __init__(self) -> None:
+        super().__init__(init_chessboard())
+
+
+class XiangqiChessboard(BaseChessboard):
+    def __init__(self) -> None:
+        super().__init__(init_chessboard_xq())
+
+
+class ShogiChessboard(BaseChessboard):
+    def __init__(self) -> None:
+        super().__init__(init_chessboard_sg())
 
 
 def init_chessboard():
