@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from turtle import pos
 import numpy as np
 
 from pieces import pieces, pieces_sg, pieces_xq
@@ -25,10 +24,13 @@ class BaseChessboard:
         if not self._check_rule(position, destination):
             return False
 
-        value = self.cb[position[0], position[1]]
-        self.cb[destination[0], destination[1]] = value
+        self.cb[destination[0], destination[1]] \
+            = self.cb[position[0], position[1]]
         self.cb[position[0], position[1]] = 0
         return True
+
+    def to_numpy(self):
+        return self.cb
 
 
 class Chessboard(BaseChessboard):
@@ -101,9 +103,9 @@ def init_chessboard_sg():
     return cb
 
 
-def main():
-    print(init_chessboard_sg())
+# def main():
+#     print(init_chessboard_sg())
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
