@@ -52,7 +52,6 @@ class CEIL:
             tmp_gs = tmp_gs + self.__remove_redundant(item) + '@'
 
         gen_code = tmp_gs[:-1]
-        del tmp_gs
 
         # Repeated empty cells detection
         tmp_gs = ''
@@ -79,7 +78,6 @@ class CEIL:
             tmp_gs = tmp_gs + ch
 
         gen_code = tmp_gs
-        del tmp_gs
 
         return gen_code
 
