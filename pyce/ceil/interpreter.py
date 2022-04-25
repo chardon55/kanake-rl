@@ -28,7 +28,7 @@ class CEIL:
                 if len(cell_s) == 0:
                     continue
 
-                if cell_s[0] == 'x' or cell_s[0] == 'X':
+                if cell_s[0] == '_':
                     cur_c = cur_c + int(cell_s[1:]) - 1
                     continue
 
@@ -52,28 +52,30 @@ class CEIL:
             tmp_gs = tmp_gs + self.__remove_redundant(item) + '@'
 
         gen_code = tmp_gs[:-1]
+        del tmp_gs
 
         # Repeated empty cells detection
         tmp_gs = ''
         repr_start = -1
 
         for i, ch in enumerate(gen_code):
-            if repr_start < 0:
-                if ch == '&':
+            if ch == '&':
+                if repr_start < 0:
                     repr_start = i
+                    if tmp_gs[-1] == '@':
+                        continue
+                else:
+                    continue
             else:
-                if ch != '&':
+                if repr_start >= 0:
                     repr_c = i - repr_start - 1
                     repr_start = -1
                     if repr_c > 1:
-                        tmp_gs = f"{tmp_gs}&x{repr_c}&"
+                        tmp_gs = f"{tmp_gs}_{repr_c}&"
                     elif repr_c > 0:
-                        tmp_gs = tmp_gs + '&&'
-                    else:
                         tmp_gs = tmp_gs + '&'
 
-            if ch != '&':
-                tmp_gs = tmp_gs + ch
+            tmp_gs = tmp_gs + ch
 
         gen_code = tmp_gs
         del tmp_gs
@@ -95,7 +97,7 @@ class CEIL:
 
 def main():
     c = CEIL()
-    arr = c.parse("1&x6&5@2&&5@3&6&4&2&x3&1", (8, 8))
+    arr = c.parse("1&_6&5@2&&5@@3&6&4&2&_3&1@@_5&3", (8, 8))
     print(arr)
     print(c.generate(arr))
 
