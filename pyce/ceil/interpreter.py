@@ -70,8 +70,9 @@ class CEIL:
                 if repr_start >= 0:
                     repr_c = i - repr_start - 1
                     repr_start = -1
+
                     if repr_c > 1:
-                        tmp_gs = f"{tmp_gs}_{repr_c}&"
+                        tmp_gs = f"{tmp_gs}_{repr_c + 1 if tmp_gs[-1] == '@' else repr_c}&"
                     elif repr_c > 0:
                         tmp_gs = tmp_gs + '&'
 
