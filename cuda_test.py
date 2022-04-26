@@ -1,12 +1,14 @@
+from threading import Thread
 import torch
 from torch import cuda
 
 
-def test_cuda(verbose=False, rand_test=False) -> torch.device:
+def test_cuda(verbose=False, rand_test=False) -> bool:
     cuda_available = cuda.is_available()
-    available_device = torch.device("cuda" if cuda_available else "cpu")
 
     if verbose:
+        print("PyTorch Version: " + torch.version.__version__)
+
         print("CUDA supported?: " + 'Yes' if cuda_available else 'No')
         print("Current CUDA version: " +
               torch.version.cuda if cuda_available else "n/a")
@@ -20,11 +22,11 @@ def test_cuda(verbose=False, rand_test=False) -> torch.device:
 
     if rand_test:
         print("Generating a 5x5 tensor... ", end='')
-        gr = torch.rand(5, 5, device='cuda')
-        print("done")
-        print(gr)
+        tg = torch.rand(5, 5, device='cuda')
+        print('done')
+        print(tg)
 
-    return available_device
+    return cuda_available
 
 
 def main():
