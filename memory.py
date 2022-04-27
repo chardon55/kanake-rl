@@ -1,6 +1,7 @@
 from collections import deque, namedtuple
 import random
 
+# Transition <- <s,a,r,s'>
 Transition = namedtuple('Transition', (
     'state',
     'action',

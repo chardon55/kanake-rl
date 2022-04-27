@@ -17,8 +17,5 @@ class DQNPolicy(nn.Module):
             nn.Linear(480, action_count),
         )
 
-    def __gen_rand(self):
-        pass
-
     def forward(self, x):
         return self.seq(x)

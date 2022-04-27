@@ -15,13 +15,13 @@ class CEIL:
 
         for row in input.strip().split('@'):
             cur_c = -1
-            cur_r = cur_r + 1
+            cur_r += 1
             if cur_r >= shape[0]:
                 break
 
             for cell in row.strip().split('&'):
                 cell_s = cell.strip()
-                cur_c = cur_c + 1
+                cur_c += 1
                 if cur_c >= shape[1]:
                     break
 
@@ -29,7 +29,7 @@ class CEIL:
                     continue
 
                 if cell_s[0] == '_':
-                    cur_c = cur_c + int(cell_s[1:]) - 1
+                    cur_c += int(cell_s[1:]) - 1
                     continue
 
                 cb[cur_r, cur_c] = int(cell_s)
@@ -49,7 +49,7 @@ class CEIL:
 
         tmp_gs = ''
         for item in gen_code.split('@'):
-            tmp_gs = tmp_gs + self.__remove_redundant(item) + '@'
+            tmp_gs += self.__remove_redundant(item) + '@'
 
         gen_code = tmp_gs[:-1]
 
@@ -73,9 +73,9 @@ class CEIL:
                     if repr_c > 1:
                         tmp_gs = f"{tmp_gs}_{repr_c + 1 if tmp_gs[-1] == '@' else repr_c}&"
                     elif repr_c > 0:
-                        tmp_gs = tmp_gs + '&'
+                        tmp_gs += '&'
 
-            tmp_gs = tmp_gs + ch
+            tmp_gs += ch
 
         gen_code = tmp_gs
 
@@ -87,7 +87,7 @@ class CEIL:
         for row in cb:
             for cell in row:
                 c = str(int(cell))
-                gs = gs + (c if c != '0' else '') + "&"
+                gs += (c if c != '0' else '') + "&"
 
             gs = gs.removesuffix('&') + "@"
 
@@ -96,7 +96,7 @@ class CEIL:
 
 def main():
     c = CEIL()
-    arr = c.parse("1&_6&5@2&&5@@3&6&4&2&_3&1@@_5&3", (8, 8))
+    arr = c.parse("1&_6&5@2&&&5@@3&&6&4&2&_1&1@&_2&_3&3@_5&3", (8, 8))
     print(arr)
     print(c.generate(arr))
 
