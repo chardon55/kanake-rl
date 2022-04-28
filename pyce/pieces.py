@@ -31,6 +31,6 @@ pieces_sg = {
     "ryuuma": 11,       # 龍馬 +B
     "hisha": 12,        # 飛車 R
     "ryuuou": 13,       # 龍王 +R
-    "gyokushou": -14,   # 玉將 K
+    "gyokushou": 14,    # 玉將 K
     "oushou": 14,       # 王將 K
 }

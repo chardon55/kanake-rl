@@ -22,7 +22,7 @@ MEMORY_CAPACITY = 12000
 class DDQNAgent:
     def __init__(self,
                  state_count: int, action_count: int, batch_size: int,
-                 device: Union[torch.device, str] = 'cuda:0' if torch.cuda.is_available() else 'cpu') -> None:
+                 device: Union[torch.device, str] = 'cpu') -> None:
         super(DDQNAgent, self).__init__()
         self.state_count = state_count
         self.action_count = action_count
@@ -32,7 +32,7 @@ class DDQNAgent:
 
         # Double DQN
         self.qn_policy: q.DQNPolicy = \
-            q.DQNPolicy(state_count, action_count).to(device)
+            q.DQNPolicy(state_count, action_count, device=device)
         self.qn_target: q.DQNPolicy = \
             q.DQNPolicy(state_count, action_count).to(device)
         self.qn_target.load_state_dict(self.qn_policy.state_dict())

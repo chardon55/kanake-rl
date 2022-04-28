@@ -29,6 +29,9 @@ class BaseChessboard:
         self.cb[position[0], position[1]] = 0
         return True
 
+    def switch_player(self):
+        self.cb = flip_chessboard(self.cb)
+
     def to_numpy(self):
         return self.cb
 
@@ -44,12 +47,21 @@ class XiangqiChessboard(BaseChessboard):
 
 
 class ShogiChessboard(BaseChessboard):
-    def __init__(self) -> None:
+    def __init__(self, is_defender=False) -> None:
         super().__init__(init_chessboard_sg())
+        self.__defend = is_defender
+
+    def switch_player(self):
+        self.cb = rotate_chessboard(self.cb)
+        self.__defend = not self.__defend
+
+    @property
+    def is_defender(self):
+        return self.__defend
 
 
 def init_chessboard():
-    cb = np.zeros([8, 8])
+    cb = np.zeros([8, 8], dtype=np.int8)
 
     for _ in range(2):
         cb[-2] = pieces["pawn"]
@@ -65,7 +77,7 @@ def init_chessboard():
 
 
 def init_chessboard_xq():
-    cb = np.zeros([10, 9])
+    cb = np.zeros([10, 9], dtype=np.int8)
 
     for _ in range(2):
         for i in range(5):
@@ -84,7 +96,7 @@ def init_chessboard_xq():
 
 
 def init_chessboard_sg():
-    cb = np.zeros([9, 9])
+    cb = np.zeros([9, 9], dtype=np.int8)
 
     for _ in range(2):
         cb[-3] = pieces_sg["fuhyou"]
@@ -103,9 +115,9 @@ def init_chessboard_sg():
     return cb
 
 
-# def main():
-#     print(init_chessboard_sg())
+def main():
+    print(init_chessboard_sg())
 
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()

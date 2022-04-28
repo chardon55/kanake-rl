@@ -1,4 +1,6 @@
+from typing import Union
 from torch import nn
+import torch
 
 
 class DQNPolicy(nn.Module):
@@ -17,5 +19,11 @@ class DQNPolicy(nn.Module):
             nn.Linear(480, action_count),
         )
 
+        self.__p = nn.Parameter(torch.empty(0))
+
     def forward(self, x):
+        if isinstance(x, torch.Tensor):
+            x = x.to(self.__p.device)
+            pass
+
         return self.seq(x)
