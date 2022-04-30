@@ -11,7 +11,7 @@ class BaseChessRenderer:
 
     def render(self, chessboard):
         if isinstance(chessboard, BaseChessboard):
-            chessboard = chessboard.to_numpy()
+            chessboard = chessboard.numpy_chessboard
         elif not isinstance(chessboard, np.ndarray):
             raise NotSupportedError()
 

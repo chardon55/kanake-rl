@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import warnings
 import numpy as np
 
 from pieces import pieces, pieces_sg, pieces_xq
@@ -32,7 +33,8 @@ class BaseChessboard:
     def switch_player(self):
         self.cb = flip_chessboard(self.cb)
 
-    def to_numpy(self):
+    @property
+    def numpy_chessboard(self):
         return self.cb
 
 
