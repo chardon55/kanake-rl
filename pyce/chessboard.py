@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import overload
 import warnings
 import numpy as np
 
@@ -53,6 +54,7 @@ class ShogiChessboard(BaseChessboard):
         super().__init__(init_chessboard_sg())
         self.__defend = is_defender
 
+    @overload
     def switch_player(self):
         self.cb = rotate_chessboard(self.cb)
         self.__defend = not self.__defend

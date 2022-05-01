@@ -1,6 +1,5 @@
-from typing import Union
-from torch import nn
 import torch
+from torch import nn
 
 
 class DQNPolicy(nn.Module):
