@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import numpy as np
 
-import pyce.chessboard as _cb
+import chessboard as _cb
 
 
 class RuleSet:
@@ -26,7 +26,7 @@ class RuleSet:
         if cb[s0, s1] <= 0:
             return False
 
-        if s0 == d0 and s1 == d1:
+        if source == destination:
             return True
 
         if d0 < 0 or d1 < 0 or d0 >= r or d1 >= c:

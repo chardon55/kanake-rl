@@ -1,4 +1,3 @@
-from typing import overload
 import numpy as np
 
 import pieces as ps
@@ -6,7 +5,6 @@ from ruleset import RuleSet
 
 
 class ChessRuleSet(RuleSet):
-    @overload
     def _check_move(self, piece: int, chessboard: np.ndarray, source: tuple[2], delta: tuple[2], attacking: bool, target_piece: int) -> bool:
         s = False
 
@@ -30,7 +28,6 @@ class ChessRuleSet(RuleSet):
 
         return s
 
-    @overload
     def _check_blocked(self, chessboard: np.ndarray, source: tuple[2], destination: tuple[2], delta: tuple[2]) -> bool:
         p = chessboard[source[0], source[1]]
         # if p == ps.pieces['knight']:
@@ -63,7 +60,6 @@ class ChessRuleSet(RuleSet):
 
         return s
 
-    @overload
     def _check_promote(self, chessboard: np.ndarray, position: tuple[2], target_piece: int) -> bool:
         return not position[0] \
             and chessboard[position[0], position[1]] == ps.pieces['pawn'] \

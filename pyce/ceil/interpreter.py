@@ -47,6 +47,7 @@ class CEIL:
         # Remove redundant suffix
         gen_code = self.__remove_redundant(gen_code)
 
+        # Remove redundant suffix for each group
         tmp_gs = ''
         for item in gen_code.split('@'):
             tmp_gs += self.__remove_redundant(item) + '@'
@@ -60,8 +61,10 @@ class CEIL:
         for i, ch in enumerate(gen_code):
             if ch == '&':
                 if repr_start < 0:
+                    # Activate repetition detection
                     repr_start = i
                     if tmp_gs[-1] == '@':
+                        # The additional '&' is unnecessary when there is nothing in this group yet
                         continue
                 else:
                     continue
