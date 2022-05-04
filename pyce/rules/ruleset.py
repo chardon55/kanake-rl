@@ -13,6 +13,9 @@ class RuleSet:
     def _check_blocked(self, chessboard: np.ndarray, source: tuple[2], destination: tuple[2], delta: tuple[2]) -> bool:
         pass
 
+    def __call__(self, chessboard: BaseChessboard, source: tuple[2], destination: tuple[2]) -> bool:
+        return self.check(chessboard, source, destination)
+
     def check(self, chessboard: BaseChessboard, source: tuple[2], destination: tuple[2]) -> bool:
         cb = chessboard.numpy_chessboard
         r, c = cb.shape

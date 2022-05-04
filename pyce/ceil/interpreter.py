@@ -9,6 +9,9 @@ class CEIL:
         Version: 0.1.0
     '''
 
+    def __call__(self, input: str, shape: tuple[2]) -> np.ndarray:
+        return self.parse(input, shape)
+
     def parse(self, input: str, shape: tuple[2]) -> np.ndarray:
         cb = np.zeros(shape)
         cur_r, cur_c = -1, -1

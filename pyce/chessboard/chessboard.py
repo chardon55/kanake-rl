@@ -89,3 +89,11 @@ class BaseChessboard:
         print()
         print(f"Empty:\t{arr[0]}")
         print(SEP)
+
+    def to_numpy(self) -> np.ndarray:
+        return self.cb.copy()
+
+    def copy(self):
+        c = type(self)()
+        c.cb = self.cb
+        return c
