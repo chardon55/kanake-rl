@@ -1,8 +1,8 @@
 import numpy as np
 
-from pieces import pieces
-from chessboard.chessboard import flip_chessboard, BaseChessboard
-from rules import ChessRuleSet
+from ..pieces import pieces, pieces_names
+from .chessboard import flip_chessboard, BaseChessboard
+from ..rules import ChessRuleSet
 
 
 RULE_SET = ChessRuleSet
@@ -10,6 +10,8 @@ RULE_SET_INSTANCE = None
 
 
 def load_rule_set() -> RULE_SET:
+    global RULE_SET_INSTANCE, RULE_SET
+
     if not RULE_SET_INSTANCE:
         RULE_SET_INSTANCE = RULE_SET()
 
@@ -36,6 +38,7 @@ class Chessboard(BaseChessboard):
     def __init__(self) -> None:
         super().__init__(init_chessboard())
         self.__rule_set = load_rule_set()
+        self._piece_names = pieces_names
 
         # self._pieces = [
         #     [(6, i) for i in range(8)],

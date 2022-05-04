@@ -1,7 +1,7 @@
 import numpy as np
 
-from chessboard.chessboard import flip_chessboard, BaseChessboard
-from pieces import pieces_xq
+from .chessboard import flip_chessboard, BaseChessboard
+from ..pieces import pieces_xq
 
 
 def init_chessboard_xq():

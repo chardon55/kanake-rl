@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import numpy as np
 
-import chessboard as _cb
+from ..chessboard import BaseChessboard
 
 
 class RuleSet:
@@ -13,7 +13,7 @@ class RuleSet:
     def _check_blocked(self, chessboard: np.ndarray, source: tuple[2], destination: tuple[2], delta: tuple[2]) -> bool:
         pass
 
-    def check(self, chessboard: _cb.BaseChessboard, source: tuple[2], destination: tuple[2]) -> bool:
+    def check(self, chessboard: BaseChessboard, source: tuple[2], destination: tuple[2]) -> bool:
         cb = chessboard.numpy_chessboard
         r, c = cb.shape
         d0, d1 = destination
@@ -41,7 +41,7 @@ class RuleSet:
     def _check_promote(self, chessboard: np.ndarray, position: tuple[2], target_piece: int) -> bool:
         pass
 
-    def promote_piece(self, chessboard: _cb.BaseChessboard, position: tuple[2], target_piece: int, check_only=False) -> bool:
+    def promote_piece(self, chessboard: BaseChessboard, position: tuple[2], target_piece: int, check_only=False) -> bool:
         cb = chessboard.numpy_chessboard
 
         shape = cb.shape

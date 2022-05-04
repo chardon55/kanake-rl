@@ -1,7 +1,7 @@
 import numpy as np
 
-from chessboard.chessboard import rotate_chessboard, BaseChessboard
-from pieces import pieces_sg
+from .chessboard import rotate_chessboard, BaseChessboard
+from ..pieces import pieces_sg
 
 
 def init_chessboard_sg():

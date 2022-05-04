@@ -2,6 +2,9 @@ from abc import abstractmethod
 import numpy as np
 
 
+SEP = "-" * 20
+
+
 def flip_chessboard(cb: np.ndarray):
     return -cb[::-1]
 
@@ -13,6 +16,7 @@ def rotate_chessboard(cb: np.ndarray):
 class BaseChessboard:
     def __init__(self, cb: np.ndarray) -> None:
         self.cb = cb
+        self._piece_names = None
         # self._pieces = []
         # self._pieces_c = []
 
@@ -59,3 +63,29 @@ class BaseChessboard:
     @property
     def numpy_chessboard(self):
         return self.cb
+
+    def summary(self):
+        arr = np.array([0 for _ in range(len(self._piece_names) * 2 - 1)])
+
+        for x in np.nditer(self.cb):
+            arr[x] += 1
+
+        print(SEP)
+        print("Summary")
+        print(SEP)
+
+        print(self.cb)
+        print(SEP)
+
+        print('Self')
+        for i, name in enumerate(self._piece_names[1:]):
+            print(f"{name}:\t{arr[i+1]}")
+        print()
+
+        print('Competitor')
+        for i, name in enumerate(self._piece_names[1:]):
+            print(f"{name}:\t{arr[-i-1]}")
+
+        print()
+        print(f"Empty:\t{arr[0]}")
+        print(SEP)

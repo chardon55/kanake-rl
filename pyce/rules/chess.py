@@ -1,29 +1,29 @@
 import numpy as np
 
-import pieces as ps
-from ruleset import RuleSet
+from ..pieces import pieces
+from .ruleset import RuleSet
 
 
 class ChessRuleSet(RuleSet):
     def _check_move(self, piece: int, chessboard: np.ndarray, source: tuple[2], delta: tuple[2], attacking: bool, target_piece: int) -> bool:
         s = False
 
-        if piece == ps.pieces['pawn']:
+        if piece == pieces['pawn']:
             if delta[0] < 0:
                 if attacking:
                     s = (delta[1] == 1 or delta[1] == -1) and delta[0] == -1
                 else:
                     s = not delta[1] \
                         and (delta[0] == -1 or (delta[0] == -2 if source[0] == 6 else False))
-        elif piece == ps.pieces['rook']:
+        elif piece == pieces['rook']:
             s = not delta[0] * delta[1]
-        elif piece == ps.pieces['knight']:
+        elif piece == pieces['knight']:
             s = abs(delta[0] * delta[1]) == 2
-        elif piece == ps.pieces['bishop']:
+        elif piece == pieces['bishop']:
             s = abs(delta[0]) == abs(delta[1])
-        elif piece == ps.pieces['queen']:
+        elif piece == pieces['queen']:
             s = not delta[0] * delta[1] or abs(delta[0]) == abs(delta[1])
-        elif piece == ps.pieces['king']:
+        elif piece == pieces['king']:
             s = abs(delta[0]) <= 1 and abs(delta[1]) <= 1
 
         return s
@@ -62,6 +62,6 @@ class ChessRuleSet(RuleSet):
 
     def _check_promote(self, chessboard: np.ndarray, position: tuple[2], target_piece: int) -> bool:
         return not position[0] \
-            and chessboard[position[0], position[1]] == ps.pieces['pawn'] \
-            and target_piece != ps.pieces['pawn'] \
-            and target_piece != ps.pieces['king']
+            and chessboard[position[0], position[1]] == pieces['pawn'] \
+            and target_piece != pieces['pawn'] \
+            and target_piece != pieces['king']
