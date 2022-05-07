@@ -22,6 +22,9 @@ class RuleSet:
         d0, d1 = destination
         s0, s1 = source
 
+        d0, d1 = int(d0), int(d1)
+        s0, s1 = int(s0), int(s1)
+
         if s0 < 0 or s1 < 0 or s0 >= r or s1 >= c:
             return False
 
@@ -30,7 +33,7 @@ class RuleSet:
             return False
 
         if source == destination:
-            return True
+            return False
 
         if d0 < 0 or d1 < 0 or d0 >= r or d1 >= c:
             return False

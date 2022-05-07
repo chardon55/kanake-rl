@@ -51,8 +51,9 @@ class BaseChessboard:
         self.__move(position, destination)
         return True
 
-    def switch_player(self):
-        self.cb = flip_chessboard(self.cb)
+    def switch_player(self, flip=False):
+        self.cb = \
+            flip_chessboard(self.cb) if flip else rotate_chessboard(self.cb)
 
     def transit(self, source: tuple[2], destination: tuple[2]):
         if self.cb[source[0], source[1]] >= 0:
@@ -97,3 +98,6 @@ class BaseChessboard:
         c = type(self)()
         c.cb = self.cb
         return c
+
+    def __str__(self) -> str:
+        return str(self.cb)

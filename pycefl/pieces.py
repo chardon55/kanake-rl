@@ -45,3 +45,7 @@ def __init_dict(name_tuple) -> dict:
 pieces = __init_dict(pieces_names)
 pieces_xq = __init_dict(pieces_names_xq)
 pieces_sg = __init_dict(pieces_names_sg)
+
+pieces_count = (None, 8, 2, 2, 2, 1, 1)
+pieces_xq_count = (None, 5, 2, 2, 2, 2, 2, 1)
+piece_sg_count = (None, 9, 0, 2, 0, 2, 0, 1, 0, 1, 1, 0, 1, 0, 1)

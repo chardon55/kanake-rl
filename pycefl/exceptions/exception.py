@@ -1,0 +1,2 @@
+class PyCEException(Exception):
+    pass
