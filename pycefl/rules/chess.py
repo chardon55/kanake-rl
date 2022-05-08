@@ -5,7 +5,7 @@ from .ruleset import RuleSet
 
 
 class ChessRuleSet(RuleSet):
-    def _check_move(self, piece: int, chessboard: np.ndarray, source: tuple[2], delta: tuple[2], attacking: bool, target_piece: int) -> bool:
+    def _check_move(self, piece: int, chessboard: np.ndarray, source: tuple[2], delta: tuple[2], attacking: bool, target_piece: int, challenger: bool) -> bool:
         s = False
 
         if piece == pieces['pawn']:
@@ -25,6 +25,16 @@ class ChessRuleSet(RuleSet):
             s = not delta[0] * delta[1] or abs(delta[0]) == abs(delta[1])
         elif piece == pieces['king']:
             s = abs(delta[0]) <= 1 and abs(delta[1]) <= 1
+            if not s and not delta[0] and abs(delta[1]) == 2 and source == (7, (3 if challenger else 4)):
+                if delta[1] > 0:
+                    s = chessboard[7, 7] == pieces['rook'] \
+                        and not chessboard[7, 6]\
+                        and not chessboard[7, 5]
+
+                else:
+                    s = chessboard[7, 0] == pieces['rook'] \
+                        and not chessboard[7, 1]\
+                        and not chessboard[7, 2]
 
         return s
 

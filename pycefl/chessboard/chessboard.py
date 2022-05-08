@@ -14,11 +14,19 @@ def rotate_chessboard(cb: np.ndarray):
 
 
 class BaseChessboard:
-    def __init__(self, cb: np.ndarray) -> None:
+    def __init__(self, cb: np.ndarray, challenger_side=False) -> None:
         self.cb = cb
         self._piece_names = None
+        self.__challenger_side = False
+        if challenger_side:
+            self.switch_player(flip=False)
+
         # self._pieces = []
         # self._pieces_c = []
+
+    @property
+    def challenger_side(self):
+        return self.__challenger_side
 
     @abstractmethod
     def _check_rule(self, position, destination) -> bool:
@@ -26,6 +34,8 @@ class BaseChessboard:
 
     def __move(self, source: tuple[2], destination: tuple[2]):
         # p = self.cb[source[0], source[1]]
+        if source == destination:
+            return
 
         self.cb[destination[0], destination[1]] \
             = self.cb[source[0], source[1]]
@@ -52,8 +62,11 @@ class BaseChessboard:
         return True
 
     def switch_player(self, flip=False):
-        self.cb = \
-            flip_chessboard(self.cb) if flip else rotate_chessboard(self.cb)
+        if flip:
+            self.cb = flip_chessboard(self.cb)
+        else:
+            self.cb = rotate_chessboard(self.cb)
+            self.__challenger_side = not self.__challenger_side
 
     def transit(self, source: tuple[2], destination: tuple[2]):
         if self.cb[source[0], source[1]] >= 0:

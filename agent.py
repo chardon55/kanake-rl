@@ -6,12 +6,12 @@ from torch import nn
 import matplotlib.pyplot as plt
 
 import q
-from memory import Memory, Transition
+from memory import ReplayMemory, Transition
 
 BATCH_SIZE = 128
-GAMMA = 0.999
-EPS_START = 0.9
-EPS_END = 0.05
+GAMMA = .999                # Discount coefficient
+EPS_START = .9
+EPS_END = .05
 EPS_DECAY = 200
 TARGET_UPDATE = 10
 
@@ -46,7 +46,7 @@ class DDQNAgent:
 
         self.loss_m = nn.SmoothL1Loss()
 
-        self.memory = Memory(MEMORY_CAPACITY)
+        self.memory = ReplayMemory(MEMORY_CAPACITY)
         self.step_count = 0
 
         self.episode_durations = []

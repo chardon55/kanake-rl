@@ -10,7 +10,7 @@ Transition = namedtuple('Transition', (
 ))
 
 
-class Memory:
+class ReplayMemory:
     def __init__(self, capacity) -> None:
         self.m = deque([], maxlen=capacity)
 

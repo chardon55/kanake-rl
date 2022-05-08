@@ -25,14 +25,9 @@ def init_chessboard_sg():
 
 
 class ShogiChessboard(BaseChessboard):
-    def __init__(self, is_defender=False) -> None:
-        super().__init__(init_chessboard_sg())
-        self.__defend = is_defender
-
-    def switch_player(self):
-        self.cb = rotate_chessboard(self.cb)
-        self.__defend = not self.__defend
+    def __init__(self, challenger_side=True) -> None:
+        super().__init__(init_chessboard_sg(), challenger_side)
 
     @property
-    def is_defender(self):
-        return self.__defend
+    def defender_side(self):
+        return not self.challenger_side

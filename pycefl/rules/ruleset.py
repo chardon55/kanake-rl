@@ -6,7 +6,7 @@ from ..chessboard import BaseChessboard
 
 class RuleSet:
     @abstractmethod
-    def _check_move(self, piece: int, chessboard: np.ndarray, source: tuple[2], delta: tuple[2], attacking: bool, target_piece: int) -> bool:
+    def _check_move(self, piece: int, chessboard: np.ndarray, source: tuple[2], delta: tuple[2], attacking: bool, target_piece: int, challenger: bool) -> bool:
         pass
 
     @abstractmethod
@@ -40,7 +40,7 @@ class RuleSet:
 
         target_p = cb[d0, d1]
         delta = d0 - s0, d1 - s1
-        return self._check_move(cb[s0, s1], cb, source, delta, target_p < 0, target_p) \
+        return self._check_move(cb[s0, s1], cb, source, delta, target_p < 0, target_p, chessboard.challenger_side) \
             and not self._check_blocked(cb, source, destination, delta)
 
     @abstractmethod

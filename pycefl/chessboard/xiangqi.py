@@ -24,5 +24,5 @@ def init_chessboard_xq():
 
 
 class XiangqiChessboard(BaseChessboard):
-    def __init__(self) -> None:
-        super().__init__(init_chessboard_xq())
+    def __init__(self, challenger_side=False) -> None:
+        super().__init__(init_chessboard_xq(), challenger_side)
