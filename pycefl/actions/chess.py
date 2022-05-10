@@ -1,3 +1,4 @@
+import math
 from .actionset import ActionSet
 from ..chessboard import Chessboard
 from ..pieces import pieces_count, pieces_names, pieces
@@ -8,7 +9,7 @@ RANGES_CLASSIC = (0, 32, 88, 104, 160, 216, 224, 226)
 RANGES_REDUCED = (0, 24, 32, 48, 56, 64, 72, 74)
 
 
-class ChessAction(ActionSet):
+class ChessActionSet(ActionSet):
     def __init__(self, chessboard: Chessboard, type: str = "classic") -> None:
         super().__init__(chessboard)
         self.__type = type
@@ -30,8 +31,8 @@ class ChessAction(ActionSet):
             for i, pc in enumerate(pieces_count[1:], start=1):
                 if action in range(ch_range[i-1], ch_range[i]):
                     piece = i
-                    c = (action - ch_range[i-1]
-                         ) // ((ch_range[i] - ch_range[i-1]) / pc)
+                    c = math.floor((action - ch_range[i-1]
+                                    ) / ((ch_range[i] - ch_range[i-1]) / pc))
                     break
 
         return piece, c
@@ -97,7 +98,7 @@ class ChessAction(ActionSet):
 
                             elif i == pieces['rook']:
                                 distance = t % 7
-                                direction = t // 7
+                                direction = int(t / 7)
                                 if direction == 0:
                                     delta[1] = distance
                                 elif direction == 1:
@@ -108,7 +109,7 @@ class ChessAction(ActionSet):
                                     delta[0] = distance
                             elif i == pieces['bishop']:
                                 distance = t % 7 + 1
-                                direction = t // 7 + 1
+                                direction = int(t / 7) + 1
                                 delta[0] = delta[1] = distance
                                 if direction in (2, 3):
                                     delta[0] = -delta[0]
@@ -121,7 +122,7 @@ class ChessAction(ActionSet):
                                 t %= delimiter
 
                                 distance = t % 7 + 1
-                                direction = t // 7 + 1
+                                direction = int(t / 7) + 1
                                 if group:
                                     delta[0] = delta[1] = distance
                                     if direction in (2, 3):
@@ -164,7 +165,7 @@ class ChessAction(ActionSet):
                                 if t in (2, 3):
                                     delta[1] = -delta[1]
                             elif i == pieces['queen']:
-                                group = t // 2
+                                group = int(t / 2)
                                 t %= 2
 
                                 if group:
@@ -190,3 +191,24 @@ class ChessAction(ActionSet):
                         break
 
         return int(source[0] + delta[0]), int(source[1] + delta[1])
+
+    def _calculate_reward(self, chessboard: Chessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2]) -> float:
+        if target_piece == -pieces['king']:
+            return 150.
+
+        if target_piece == -pieces['queen']:
+            return 30. + 8. * destination[0]
+
+        if target_piece == -pieces['pawn']:
+            return 1. + (destination[0] - 1.) ** 3. / 3.
+
+        if target_piece in (-pieces['rook'], -pieces['bishop']):
+            return 10. + 7. * destination[0]
+
+        if target_piece == -pieces['knight']:
+            return 5. + 5. * destination[0]
+
+        return -.05
+
+    def _assume_end(self, chessboard: Chessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2]) -> bool:
+        return abs(target_piece) == pieces['king']

@@ -1,10 +1,10 @@
 from pycefl.chessboard import Chessboard
-from pycefl.actions import ChessAction
+from pycefl.actions import ChessActionSet
 
 
 def main():
     cb = Chessboard()
-    action_set = ChessAction(cb)
+    action_set = ChessActionSet(cb)
 
     cb.cb[7, -2] = cb.cb[7, -3] = 0
 

@@ -1,12 +1,22 @@
 from abc import abstractmethod
+from collections import namedtuple
 import numpy as np
 
+from pycefl.exceptions.actionset import PieceNotFoundError
+
 from ..chessboard import BaseChessboard
+
+PerformanceInfo = namedtuple('MDPInfo', (
+    'reward',
+    'done',
+    'success',
+))
 
 
 class ActionSet:
     def __init__(self, chessboard: BaseChessboard) -> None:
         self.__chessboard = chessboard
+        self.__shape = self.chessboard.numpy_chessboard.shape
 
     def action_number(self):
         pass
@@ -35,16 +45,42 @@ class ActionSet:
     def __call__(self, action: int) -> bool:
         return self.perform(action)
 
-    def interpret(self, action: int) -> tuple[2]:
+    def interpret(self, action: int) -> tuple[4]:
         piece, order = self._select_piece(action)
         pos = self._locate_piece(piece, order)
-        return pos, self._read_action(action, pos)
+        dest = self._read_action(action, pos)
 
-    def perform(self, action: int) -> bool:
-        return self.__chessboard.move_piece(*self.interpret(action))
+        dest = min(self.__shape[0] - 1, dest[0]
+                   ), min(self.__shape[1] - 1, dest[1])
+
+        return piece, self.chessboard.numpy_chessboard[dest[0], dest[1]], pos, dest
+
+    def perform(self, action: int) -> PerformanceInfo:
+        try:
+            piece, target_piece, src, dest = self.interpret(action)
+        except PieceNotFoundError:
+            return PerformanceInfo(0, False, False)
+
+        success = self.__chessboard.move_piece(src, dest)
+        reward = self._calculate_reward(
+            self.__chessboard, piece, target_piece, src, dest
+        )
+        done = self._assume_end(
+            self.__chessboard, piece, target_piece, src, dest
+        )
+
+        return PerformanceInfo(reward, done, success)
 
     def simulate(self):
         return ActionSimulator(self)
+
+    @abstractmethod
+    def _calculate_reward(self, chessboard: BaseChessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2]) -> float:
+        return 0
+
+    @abstractmethod
+    def _assume_end(self, chessboard: BaseChessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2]) -> bool:
+        return False
 
 
 class ActionSimulator:
@@ -73,7 +109,11 @@ class ActionSimulator:
         self.cb[source[0], source[1]] = 0
 
     def forward(self, action: int) -> bool:
-        src, dest = self.__action_set.interpret(action)
+        try:
+            src, dest = self.__action_set.interpret(action)
+        except PieceNotFoundError:
+            return False
+
         if len(self.__moves) > 0 and src != self.__moves[-1][-1]:
             return False
 

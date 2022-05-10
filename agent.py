@@ -4,6 +4,9 @@ import random
 import torch
 from torch import nn
 import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+from datetime import datetime
 
 import q
 from memory import ReplayMemory, Transition
@@ -17,6 +20,9 @@ TARGET_UPDATE = 10
 
 LEARNING_RATE = .003
 MEMORY_CAPACITY = 12000
+
+SAVE_PATH = './models/ddqn-{0}-.pt'
+T_SAVE_PATH = './models/ddqn-target-{0}-.pt'
 
 
 class DDQNAgent:
@@ -32,7 +38,7 @@ class DDQNAgent:
 
         # Double DQN
         self.qn_policy: q.DQNPolicy = \
-            q.DQNPolicy(state_count, action_count, device=device)
+            q.DQNPolicy(state_count, action_count).to(device)
         self.qn_target: q.DQNPolicy = \
             q.DQNPolicy(state_count, action_count).to(device)
         self.qn_target.load_state_dict(self.qn_policy.state_dict())
@@ -60,9 +66,12 @@ class DDQNAgent:
 
         if sample > eps_threshold:
             with torch.no_grad():
-                return self.qn_policy(state).max(1)[1].view(1, 1)
+                return self.qn_policy(state).max(0)[1].view(1, 1)
         else:
             return torch.tensor([[random.randrange(self.action_count)]], dtype=torch.long, device=self.device)
+
+    def memorize(self, *args):
+        self.memory.push(*args)
 
     def step(self):
         if len(self.memory) < BATCH_SIZE:
@@ -103,6 +112,8 @@ class DDQNAgent:
         self.optimizer.step()
 
     def plot_durations(self):
+        sns.set_theme(style='darkgrid')
+
         plt.figure(2)
         plt.clf()
         durations_t = torch.tensor(self.episode_durations, dtype=torch.float)
@@ -110,8 +121,17 @@ class DDQNAgent:
         plt.xlabel('Episode')
         plt.ylabel('Duration')
         plt.plot(durations_t.numpy())
+
         # Take 100 episode averages and plot them too
         if len(durations_t) >= 100:
             means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
             means = torch.cat((torch.zeros(99), means))
             plt.plot(means.numpy())
+
+        plt.show()
+
+    def save(self):
+        d_str = datetime.now().strftime(r'%Y-%m-%d_%H-%M-%s')
+
+        torch.save(self.qn_policy, SAVE_PATH.format(d_str))
+        torch.save(self.qn_target, T_SAVE_PATH.format(d_str))

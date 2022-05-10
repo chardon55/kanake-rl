@@ -23,6 +23,5 @@ class DQNPolicy(nn.Module):
     def forward(self, x):
         if isinstance(x, torch.Tensor):
             x = x.to(self.__p.device)
-            pass
 
         return self.seq(x)

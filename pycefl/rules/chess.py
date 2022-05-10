@@ -43,6 +43,9 @@ class ChessRuleSet(RuleSet):
         # if p == ps.pieces['knight']:
         #     return False
 
+        if chessboard[destination[0], destination[1]] > 0:
+            return True
+
         s = False
 
         sgns = np.sign(delta)

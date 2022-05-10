@@ -68,12 +68,6 @@ class BaseChessboard:
             self.cb = rotate_chessboard(self.cb)
             self.__challenger_side = not self.__challenger_side
 
-    def transit(self, source: tuple[2], destination: tuple[2]):
-        if self.cb[source[0], source[1]] >= 0:
-            return
-
-        self.__move(source, destination)
-
     @property
     def numpy_chessboard(self):
         return self.cb

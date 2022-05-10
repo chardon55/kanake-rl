@@ -1,16 +1,32 @@
+from abc import abstractmethod
+from collections import namedtuple
+from typing import Type
 from ..chessboard import BaseChessboard
 from ..actions import ActionSet
-from ..reward_function import RewardFunction
 from ..ceil import CEIL
 
 
 ceil_interpreter = CEIL()
 
+MDPInfo = namedtuple('MDPInfo', (
+    'state',
+    'state2',
+    'reward',
+    'done',
+    'success',
+))
+
 
 class Environment:
-    def __init__(self, chessboard: BaseChessboard) -> None:
-        self.__cb = chessboard
+    def __init__(self, action_set_type: Type[ActionSet]) -> None:
+        self.__cb: BaseChessboard = None
         self.__ceil = ceil_interpreter
+        self.__action_set = None
+        self.__action_set_type = action_set_type
+
+    @property
+    def action_set(self):
+        return self.__action_set
 
     @property
     def chessboard(self):
@@ -20,8 +36,27 @@ class Environment:
     def interpreter(self):
         return self.__ceil
 
-    def step(self, action: int):
+    @abstractmethod
+    def _init_chessboard(self):
         pass
+
+    def reset(self):
+        self.__cb = self._init_chessboard()
+        self.__action_set = self.__action_set_type(self.__cb)
+        return self
+
+    def shift(self):
+        self.__cb.switch_player(flip=False)
+
+    def flip(self):
+        self.__cb.switch_player(flip=True)
+
+    def step(self, action: int) -> MDPInfo:
+        state = self.__cb.numpy_chessboard.copy()
+        reward, done, success = self.__action_set.perform(action)
+        state2 = self.__cb.numpy_chessboard.copy()
+
+        return MDPInfo(state, state2, reward, done, success)
 
 
 # class CommonEnvironment:
