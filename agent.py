@@ -1,22 +1,25 @@
 from typing import Union
 import math
 import random
+import numpy as np
 import torch
 from torch import nn
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 import pandas as pd
 from datetime import datetime
 
 import q
 from memory import ReplayMemory, Transition
 
-BATCH_SIZE = 128
-GAMMA = .999                # Discount coefficient
-EPS_START = .9
-EPS_END = .05
-EPS_DECAY = 200
+GAMMA = .96                # Discount coefficient
+
 TARGET_UPDATE = 10
+
+EX_THRES_START = .03
+EX_THRES_END = .95
+EX_THRES_RATE = .005
 
 LEARNING_RATE = .003
 MEMORY_CAPACITY = 12000
@@ -57,59 +60,52 @@ class DDQNAgent:
 
         self.episode_durations = []
 
-    def select_action(self, state):
-        sample = random.random()
+    def select_action(self, state) -> torch.Tensor:
+        threshold = EX_THRES_START + \
+            (EX_THRES_END - EX_THRES_START) * \
+            np.tanh(self.step_count * EX_THRES_RATE)
 
-        eps_threshold = EPS_END + \
-            (EPS_START - EPS_END) * math.exp(-1. * self.step_count / EPS_DECAY)
-        self.state_count += 1
-
-        if sample > eps_threshold:
+        if random.random() > threshold:
             with torch.no_grad():
-                return self.qn_policy(state).max(0)[1].view(1, 1)
+                return self.qn_policy(state).argmax()
         else:
-            return torch.tensor([[random.randrange(self.action_count)]], dtype=torch.long, device=self.device)
+            return torch.tensor(random.randrange(self.action_count), dtype=torch.int64, device=self.device)
 
     def memorize(self, *args):
         self.memory.push(*args)
 
     def step(self):
-        if len(self.memory) < BATCH_SIZE:
+        if len(self.memory) < self.batch_size:
             return
 
-        transitions = self.memory.sample(BATCH_SIZE)
-        batch = Transition(*zip(*transitions))
+        transitions = self.memory.sample(self.batch_size)
+        batch_dict = Transition(*zip(*transitions))
 
-        non_final_mask = torch.tensor(
-            tuple(map(lambda s: s is not None, batch.state2)),
-            dtype=torch.bool,
-            device=self.device
-        )
-        non_final_states2 = torch.cat(
-            [s for s in batch.state2 if s is not None]
-        )
+        reward_batch = torch.tensor(batch_dict.reward, device=self.device)
 
-        state_batch = torch.cat(batch.state)
-        action_batch = torch.cat(batch.action)
-        reward_batch = torch.cat(batch.reward)
+        actions = [self.qn_policy(state) for state in batch_dict.state]
+        action_values = torch.tensor(
+            [item.max().detach() for item in actions], device=self.device)
 
-        action_values = self.qn_policy(state_batch).gather(1, action_batch)
+        state2_values = torch.zeros(self.batch_size, device=self.device)
 
-        state2_values = torch.zeros(BATCH_SIZE, device=self.device)
-        state2_values[non_final_mask] = self.qn_target(
-            non_final_states2).max(1)[0].detach()
+        for i, state2 in enumerate(batch_dict.state2):
+            if state2 is None:
+                continue
+
+            state2_values[i] = self.qn_target(state2).max().detach()
 
         # Expected Q values
         expected_action_values = (state2_values * GAMMA) + reward_batch
 
-        loss: torch.Tensor = \
-            self.loss_m(action_values, expected_action_values.unsqueeze(1))
+        loss = self.loss_m(
+            action_values, expected_action_values.unsqueeze(1)).view(1, 1)
 
         self.optimizer.zero_grad()
         loss.backward()
-        for param in self.qn_policy.parameters():
-            param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
+
+        self.step_count += 1
 
     def plot_durations(self):
         sns.set_theme(style='darkgrid')

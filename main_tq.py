@@ -9,10 +9,12 @@ EPISODE_COUNT = 10000
 CHESS_OUTPUT_CLASSIC = 226
 CHESS_OUTPUT_REDUCED = 74
 
+BATCH_SIZE = 12
+
 
 class ChessAgent(agt.DDQNAgent):
     def __init__(self, device='cpu') -> None:
-        super().__init__(64, 226, 20, device)
+        super().__init__(64, CHESS_OUTPUT_CLASSIC, BATCH_SIZE, device)
 
 
 def main():
@@ -38,10 +40,10 @@ def main():
                                  dtype=torch.float32).flatten()
                 )
 
-                state, state2, reward, done, success = env.step(action)
+                state, state2, reward, done, success = env.step(action.item())
 
             env.flip()
-            print(f"Iteration: {j}\tAction: {action}")
+            print(f"Iteration: {j}\tAction: {action.item()}")
             print(f"Reward: {reward}")
             print(state2)
 

@@ -54,7 +54,7 @@ class Environment:
     def step(self, action: int) -> MDPInfo:
         state = self.__cb.numpy_chessboard.copy()
         reward, done, success = self.__action_set.perform(action)
-        state2 = self.__cb.numpy_chessboard.copy()
+        state2 = self.__cb.numpy_chessboard.copy() if not done else None
 
         return MDPInfo(state, state2, reward, done, success)
 
