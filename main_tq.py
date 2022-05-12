@@ -4,7 +4,7 @@ from pycefl.environment import ChessEnvironment
 import agent as agt
 
 
-EPISODE_COUNT = 10000
+EPISODE_COUNT = 100
 
 CHESS_OUTPUT_CLASSIC = 226
 CHESS_OUTPUT_REDUCED = 74
@@ -45,13 +45,14 @@ def main():
             env.flip()
             print(f"Iteration: {j}\tAction: {action.item()}")
             print(f"Reward: {reward}")
+            print(f"Exploration Threshold: {agent.threshold}")
             print(state2)
 
             agent.memorize(
                 torch.tensor(state, dtype=torch.float32).flatten(),
                 action,
                 reward,
-                torch.tensor(state2, dtype=torch.float32).flatten())
+                torch.tensor(state2, dtype=torch.float32).flatten()) if state2 is not None else None
             agent.step()
             i += 1
 

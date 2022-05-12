@@ -4,10 +4,7 @@ import random
 import numpy as np
 import torch
 from torch import nn
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
-import pandas as pd
 from datetime import datetime
 
 import q
@@ -59,9 +56,11 @@ class DDQNAgent:
         self.step_count = 0
 
         self.episode_durations = []
+        self.threshold = 0
+        self.loss = 0
 
     def select_action(self, state) -> torch.Tensor:
-        threshold = EX_THRES_START + \
+        self.threshold = threshold = EX_THRES_START + \
             (EX_THRES_END - EX_THRES_START) * \
             np.tanh(self.step_count * EX_THRES_RATE)
 
@@ -85,7 +84,7 @@ class DDQNAgent:
 
         actions = [self.qn_policy(state) for state in batch_dict.state]
         action_values = torch.tensor(
-            [item.max().detach() for item in actions], device=self.device)
+            [item.max().detach() for item in actions], requires_grad=True, device=self.device)
 
         state2_values = torch.zeros(self.batch_size, device=self.device)
 
@@ -96,35 +95,18 @@ class DDQNAgent:
             state2_values[i] = self.qn_target(state2).max().detach()
 
         # Expected Q values
-        expected_action_values = (state2_values * GAMMA) + reward_batch
+        expected_action_values = torch.tensor(
+            (state2_values * GAMMA) + reward_batch, requires_grad=True, device=self.device
+        )
 
-        loss = self.loss_m(
-            action_values, expected_action_values.unsqueeze(1)).view(1, 1)
+        self.loss = loss = self.loss_m(
+            action_values, expected_action_values.unsqueeze(1))
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
         self.step_count += 1
-
-    def plot_durations(self):
-        sns.set_theme(style='darkgrid')
-
-        plt.figure(2)
-        plt.clf()
-        durations_t = torch.tensor(self.episode_durations, dtype=torch.float)
-        plt.title('Training...')
-        plt.xlabel('Episode')
-        plt.ylabel('Duration')
-        plt.plot(durations_t.numpy())
-
-        # Take 100 episode averages and plot them too
-        if len(durations_t) >= 100:
-            means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
-            means = torch.cat((torch.zeros(99), means))
-            plt.plot(means.numpy())
-
-        plt.show()
 
     def save(self):
         d_str = datetime.now().strftime(r'%Y-%m-%d_%H-%M-%s')
