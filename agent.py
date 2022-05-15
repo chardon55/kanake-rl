@@ -1,11 +1,9 @@
 from typing import Union
-import math
 import random
 import numpy as np
 import torch
 from torch import nn
 import numpy as np
-from datetime import datetime
 
 import q
 from memory import ReplayMemory, Transition
@@ -17,6 +15,10 @@ TARGET_UPDATE = 10
 EX_THRES_START = .03
 EX_THRES_END = .95
 EX_THRES_RATE = .005
+
+OFFSET_LAMBDA = -10.
+PACE_EITA = .35
+LOSS_SCALE = 80
 
 LEARNING_RATE = .003
 MEMORY_CAPACITY = 12000
@@ -50,21 +52,26 @@ class DDQNAgent:
             lr=LEARNING_RATE,
         )
 
-        self.loss_m = nn.SmoothL1Loss()
+        self.loss_m = nn.HuberLoss()
 
         self.memory = ReplayMemory(MEMORY_CAPACITY)
-        self.step_count = 0
 
         self.episode_durations = []
-        self.threshold = 0
-        self.loss = 0
+        self.threshold = 0.
+        self.loss = 1.
 
-    def select_action(self, state) -> torch.Tensor:
-        self.threshold = threshold = EX_THRES_START + \
-            (EX_THRES_END - EX_THRES_START) * \
-            np.tanh(self.step_count * EX_THRES_RATE)
+    def __threshold_func(self, rate, episode, loss, memory_size) -> float:
+        raw_thres = EX_THRES_START + (EX_THRES_END - EX_THRES_START) * (
+            np.tanh(PACE_EITA * len(self.memory) * rate + OFFSET_LAMBDA) + 1) / 2
 
-        if random.random() > threshold:
+        return min(raw_thres, EX_THRES_END)
+
+    def select_action(self, state, episode=None) -> torch.Tensor:
+        self.threshold = threshold =\
+            self.__threshold_func(EX_THRES_RATE, episode,
+                                  self.loss, len(self.memory))
+
+        if random.random() < threshold:
             with torch.no_grad():
                 return self.qn_policy(state).argmax()
         else:
@@ -77,9 +84,7 @@ class DDQNAgent:
         if len(self.memory) < self.batch_size:
             return
 
-        transitions = self.memory.sample(self.batch_size)
-        batch_dict = Transition(*zip(*transitions))
-
+        batch_dict = Transition(*zip(*self.memory.sample(self.batch_size)))
         reward_batch = torch.tensor(batch_dict.reward, device=self.device)
 
         actions = [self.qn_policy(state) for state in batch_dict.state]
@@ -95,21 +100,20 @@ class DDQNAgent:
             state2_values[i] = self.qn_target(state2).max().detach()
 
         # Expected Q values
-        expected_action_values = torch.tensor(
-            (state2_values * GAMMA) + reward_batch, requires_grad=True, device=self.device
-        )
+        expected_action_values = (
+            (state2_values * GAMMA) + reward_batch
+        ).detach().requires_grad_(True)
 
-        self.loss = loss = self.loss_m(
-            action_values, expected_action_values.unsqueeze(1))
+        loss = self.loss_m(action_values, expected_action_values.unsqueeze(1))
+        self.loss = loss.item()
 
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-        self.step_count += 1
+        if self.memory.is_full:
+            self.memory.dropout(.06)
 
-    def save(self):
-        d_str = datetime.now().strftime(r'%Y-%m-%d_%H-%M-%s')
-
-        torch.save(self.qn_policy, SAVE_PATH.format(d_str))
-        torch.save(self.qn_target, T_SAVE_PATH.format(d_str))
+    def save(self, id: str):
+        torch.save(self.qn_policy, SAVE_PATH.format(id))
+        torch.save(self.qn_target, T_SAVE_PATH.format(id))

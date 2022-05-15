@@ -63,7 +63,7 @@ class ActionSet:
 
         success = self.__chessboard.move_piece(src, dest)
         reward = self._calculate_reward(
-            self.__chessboard, piece, target_piece, src, dest
+            self.__chessboard, piece, target_piece, src, dest, success
         )
         done = self._assume_end(
             self.__chessboard, piece, target_piece, src, dest
@@ -75,7 +75,7 @@ class ActionSet:
         return ActionSimulator(self)
 
     @abstractmethod
-    def _calculate_reward(self, chessboard: BaseChessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2]) -> float:
+    def _calculate_reward(self, chessboard: BaseChessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2], success: bool) -> float:
         return 0
 
     @abstractmethod

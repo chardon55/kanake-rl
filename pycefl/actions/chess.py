@@ -192,7 +192,10 @@ class ChessActionSet(ActionSet):
 
         return int(source[0] + delta[0]), int(source[1] + delta[1])
 
-    def _calculate_reward(self, chessboard: Chessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2]) -> float:
+    def _calculate_reward(self, chessboard: Chessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2], success: bool) -> float:
+        if not success:
+            return -.1
+
         if target_piece == -pieces['king']:
             return 150.
 
@@ -208,7 +211,7 @@ class ChessActionSet(ActionSet):
         if target_piece == -pieces['knight']:
             return 5. + 5. * destination[0]
 
-        return -.05
+        return -.003
 
     def _assume_end(self, chessboard: Chessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2]) -> bool:
         return abs(target_piece) == pieces['king']

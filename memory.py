@@ -11,7 +11,7 @@ Transition = namedtuple('Transition', (
 
 
 class ReplayMemory:
-    def __init__(self, capacity) -> None:
+    def __init__(self, capacity=None) -> None:
         self.m = deque([], maxlen=capacity)
 
     def push(self, *args):
@@ -20,5 +20,18 @@ class ReplayMemory:
     def sample(self, batch_size):
         return random.sample(self.m, batch_size)
 
+    def dropout(self, frac: float):
+        count = int(len(self.m) * frac)
+        for _ in range(count):
+            del self.m[random.randrange(count)]
+
     def __len__(self):
         return len(self.m)
+
+    @property
+    def maxlen(self):
+        return self.m.maxlen
+
+    @property
+    def is_full(self):
+        return len(self.m) >= self.m.maxlen
