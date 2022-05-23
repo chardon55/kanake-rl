@@ -21,20 +21,20 @@ pieces_names_xq = (
 
 pieces_names_sg = (
     "EMPTY",
-    "fuhyou",           # 歩兵 P
-    "tokin",            # と金 +P
-    "kyousha",          # 香車 L
-    "narikyou",         # 成香 +L
-    "keima",            # 桂馬 N
-    "narikei",          # 成桂 +N
-    "ginshou",          # 銀將 S
-    "narigin",          # 成銀 +S
-    "kinshou",          # 金將 G
-    "kakugyou",         # 角行 B
-    "ryuuma",           # 龍馬 +B
-    "hisha",            # 飛車 R
-    "ryuuou",           # 龍王 +R
-    "shou",             # 王將/玉將 K
+    "pawn",             # 歩兵 P
+    "ppawn",            # と金 +P
+    "lance",            # 香車 L
+    "plance",           # 成香 +L
+    "knight",           # 桂馬 N
+    "pknight",          # 成桂 +N
+    "silver",           # 銀將 S
+    "psilver",          # 成銀 +S
+    "gold",             # 金將 G
+    "bishop",           # 角行 B
+    "pbishop",          # 龍馬 +B
+    "rook",             # 飛車 R
+    "prook",            # 龍王 +R
+    "king",             # 王將/玉將 K
 )
 
 
