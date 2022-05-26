@@ -16,8 +16,8 @@ EX_THRES_START = .03
 EX_THRES_END = .95
 EX_THRES_RATE = .005
 
-OFFSET_LAMBDA = -10.
-PACE_EITA = .35
+OFFSET_LAMBDA = -3.
+PACE_EITA = .5
 LOSS_SCALE = 80
 
 LEARNING_RATE = .003
@@ -46,8 +46,7 @@ class DDQNAgent:
         self.qn_target.load_state_dict(self.qn_policy.state_dict())
         self.qn_target.eval()
 
-        # Use RMSprop rather than Adam
-        self.optimizer = torch.optim.RMSprop(
+        self.optimizer = torch.optim.SGD(
             self.qn_policy.parameters(),
             lr=LEARNING_RATE,
         )
@@ -113,7 +112,24 @@ class DDQNAgent:
 
         if self.memory.is_full:
             self.memory.dropout(.06)
+        # r = random.random()
+        # if r < len(self.memory) / self.memory.maxlen:
+        #     self.memory.dropout(.01)
 
     def save(self, id: str):
         torch.save(self.qn_policy, SAVE_PATH.format(id))
         torch.save(self.qn_target, T_SAVE_PATH.format(id))
+
+
+class LoadedAgent:
+    def __init__(self, qn_path, action_count, device='cpu') -> None:
+        self.qn_policy = torch.load(qn_path).to(device)
+        self.device = device
+        self.action_count = action_count
+
+    def select_action(self, state, explore=False) -> torch.Tensor:
+        if not explore:
+            with torch.no_grad():
+                return self.qn_policy(state).argmax()
+        else:
+            return torch.tensor(random.randrange(self.action_count), dtype=torch.int64, device=self.device)

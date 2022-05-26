@@ -12,7 +12,8 @@ Transition = namedtuple('Transition', (
 
 class ReplayMemory:
     def __init__(self, capacity=None) -> None:
-        self.m = deque([], maxlen=capacity)
+        self.m = deque([])
+        self.__capacity = capacity
 
     def push(self, *args):
         self.m.append(Transition(*args))
@@ -30,8 +31,8 @@ class ReplayMemory:
 
     @property
     def maxlen(self):
-        return self.m.maxlen
+        return self.__capacity
 
     @property
     def is_full(self):
-        return len(self.m) >= self.m.maxlen
+        return len(self.m) >= self.maxlen
