@@ -194,16 +194,19 @@ class ChessActionSet(ActionSet):
 
     def _calculate_reward(self, chessboard: Chessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2], success: bool) -> float:
         if not success:
-            return -.1
+            return -1.
 
         if target_piece == -pieces['king']:
             return 150.
 
         # if target_piece == -pieces['queen']:
-        #     return 30. + 8. * destination[0]
+        #     return 10.
 
         # if target_piece == -pieces['pawn']:
-        #     return 1. + (destination[0] - 1.) ** 3. / 3.
+        #     return 1.
+
+        # if target_piece < 0:
+        #     return 2.
 
         # if target_piece in (-pieces['rook'], -pieces['bishop']):
         #     return 10. + 7. * destination[0]
@@ -211,7 +214,22 @@ class ChessActionSet(ActionSet):
         # if target_piece == -pieces['knight']:
         #     return 5. + 5. * destination[0]
 
+        if piece == pieces['king']:
+            return -.06
+
         return 0.
 
     def _assume_end(self, chessboard: Chessboard, piece: int, target_piece: int, source: tuple[2], destination: tuple[2]) -> bool:
-        return abs(target_piece) == pieces['king']
+        if abs(target_piece) == pieces['king']:
+            return True
+
+        r, c = chessboard.cb.shape
+        kings_only = True
+
+        for i in range(r):
+            for j in range(c):
+                if abs(chessboard.numpy_chessboard[i, j]) != pieces['king']:
+                    kings_only = False
+                    break
+
+        return kings_only

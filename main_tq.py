@@ -1,3 +1,4 @@
+from collections import deque
 import numpy as np
 import torch
 from cuda_test import test_cuda
@@ -9,17 +10,35 @@ import pandas as pd
 import plots as pts
 
 
-EPISODE_COUNT = 6
+EPISODE_COUNT = 20
 
 CHESS_OUTPUT_CLASSIC = 226
 CHESS_OUTPUT_REDUCED = 74
 
-BATCH_SIZE = 100
+BATCH_SIZE = 200
 
 
 class ChessAgent(agt.DDQNAgent):
     def __init__(self, device='cpu') -> None:
         super().__init__(64, CHESS_OUTPUT_CLASSIC, BATCH_SIZE, device)
+
+
+prev_actions = deque(maxlen=24)
+
+
+def check_nasheq(length):
+    if len(prev_actions) < 3 * length:
+        return False
+
+    for i in range(length):
+        if prev_actions[2 * i] != prev_actions[2 * length + 2 * i]:
+            return False
+
+    return True
+
+
+def is_nasheq():
+    return check_nasheq(2) or check_nasheq(3) or check_nasheq(4) or check_nasheq(5) or check_nasheq(6)
 
 
 def main():
@@ -41,45 +60,75 @@ def main():
 
         while not done:
             success = False
-            print(f"Episode {eps + 1}")
-            print(f"Player: {i % 2 + 1}\tSubepisode {i + 1}")
             j = 0
+            is_equilibrium = is_nasheq()
+
+            if is_equilibrium:
+                print('#### Equilibrium ####')
+
             while not success:
                 j += 1
-                action = agent.select_action(
+                actions = agent.select_action(
                     torch.tensor(env.chessboard.numpy_chessboard,
                                  dtype=torch.float32).flatten(),
-                    j
+                    j,
+                    force_explore=is_equilibrium
                 )
+                sorted = actions.sort(descending=True)
 
-                state, state2, reward, done, success = env.step(action.item())
+                k = 0
+                for action in sorted.indices:
+                    value = sorted.values[action]
+                    if k == 1 and value.item() == 0:
+                        break
 
-            reward -= prev_reward
+                    state, state2, reward, done, success = env.step(
+                        int(action))
 
-            agent.memorize(
-                torch.tensor(state, dtype=torch.float32).flatten(),
-                action,
-                reward,
-                torch.tensor(state2, dtype=torch.float32).flatten() if state2 is not None else None)
+                    if success and prev_reward >= 1:
+                        reward -= prev_reward
+
+                    if k == 0 or success:
+                        agent.memorize(
+                            torch.tensor(state, dtype=torch.float32).flatten(),
+                            torch.tensor(action),
+                            reward,
+                            torch.tensor(state2, dtype=torch.float32).flatten() if state2 is not None else None)
+                    if success:
+                        break
+                    k += 1
 
             agent.step()
             i += 1
 
-            env.flip()
-            print(state2)
-            print(f"Iteration: {j}\tAction: {action.item()}")
+            if i % 2:
+                env.flip()
+            print(f"Epoch: {eps + 1}")
+            print(f"Player: {i % 2 + 1}\tTurns: {i + 1}")
+            print(env.chessboard.numpy_chessboard)
+            print(f"Iteration: {j}\tAction: {action}")
             print(f"Reward: {reward}")
             print(f"Exploration Threshold: {agent.threshold}")
             size = len(agent.memory)
             print(f"Memory Size: {size} / {agent.memory.maxlen}")
             print(f"Loss: {agent.loss}")
 
+            prev_actions.append(action)
+
+            if not i % 2:
+                env.flip()
+
             thresholds.append(agent.threshold)
             losses.append(agent.loss)
             memory_size.append(size)
 
+            if i > 1000:
+                print('Turns out')
+                break
+
             # agent.plot_durations()
             prev_reward = reward
+            print()
 
         env.reset()
 

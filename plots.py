@@ -2,6 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
+from scipy.signal import savgol_filter
+
+
+def elo_linear(opponent_rating, win, loss, total, draw=0):
+    return opponent_rating + 400 * ((win + draw / 2) - (loss + draw / 2)) / total
 
 
 FIGURE_ROOT = Path('./figures')
@@ -80,12 +85,35 @@ def plot_elo(ratings, file_name: str = None, title_addition: str = None, episode
     )
 
 
-SLICES = 34
+SLICES = 80
 
 
-def main():
-    # df = pd.read_csv('./results/losses-2022-05-23_21-34-1653312871.csv')
-    df = pd.read_csv('./results/memory-2022-05-23_22-23-1653315809.csv')
+def smooth(input):
+    if input is pd.Series:
+        input = input.to_list()
+
+    return savgol_filter(input, 525, 4, mode='nearest')
+
+
+def smooth2(input):
+    if input is pd.Series:
+        input = input.to_list()
+
+    return savgol_filter(input, 17, 4, mode='nearest')
+
+
+def loss_comp():
+    # Stochastic Gradient Descent
+    df_sgd = pd.read_csv('./results/losses-2022-05-26_16-07-1653552474.csv')
+    # Root Mean Square Propagation
+    df_rmsprop = pd.read_csv(
+        './results/losses-2022-05-26_16-25-1653553534.csv')
+    # Adaptive Moment Estimation
+    df_adam = pd.read_csv('./results/losses-2022-05-26_16-48-1653554907.csv')
+
+    split_end = min(len(df_sgd['0']), len(df_rmsprop['0']), len(df_adam['0']))
+
+    # df = pd.read_csv('./results/memory-2022-05-23_22-23-1653315809.csv')
     # print(df)
 
     # length = len(df)
@@ -95,10 +123,74 @@ def main():
     # for i in range(SLICES - 1):
     #     avgs.append(df[slices*i:slices*(i+1)]['0'].mean())
 
+    df = pd.DataFrame({
+        'episode': list(range(1, split_end + 1)),
+        'SGD': smooth(df_sgd['0'][:split_end]),
+        'RMSprop': smooth(df_rmsprop['0'][:split_end]),
+        'Adam': smooth(df_adam['0'][:split_end]),
+    }).melt(('episode'), ('SGD', 'RMSprop', 'Adam'), value_name='loss', var_name='optimizer')
+
+    print(df)
+
     # print(avgs)
     init_plotting()
     # plot_losses(avgs, episodes=[i * slices for i in range(SLICES - 1)])
-    plot_memory(df['0'].to_list())
+    # plot_losses(savgol_filter(df['0'].to_list(), 545, 4, mode='nearest'))
+    sns.lineplot(
+        data=df,
+        x='episode',
+        y='loss',
+        hue='optimizer',
+    )
+    plt.title('Loss Comparison')
+    plt.savefig(FIGURE_ROOT / 'loss_comparison.png')
+    plt.show()
+    # plot_memory(df['0'].to_list())
+
+
+def elorating():
+    win_loss = pd.read_csv(
+        './results/win_loss-2022-05-23_22-58-1653317887.csv')['0']
+
+    ratings = []
+    wins = 0
+    losses = 0
+    draws = 0
+    total = len(win_loss)
+
+    s = win_loss
+    for i in range(total):
+        if s[i] > 0:
+            wins += 1
+        elif s[i] < 0:
+            losses += 1
+        else:
+            draws += 1
+
+        x = i - 4
+        if x > 0:
+            ratings.append(elo_linear(1000, wins, losses, x, draws))
+
+    df = pd.DataFrame({
+        'episode': list(range(1, len(ratings) + 1)),
+        'rating_smooth': smooth2(ratings),
+        'raw_rating': ratings,
+    }).melt(id_vars='episode', value_vars=['raw_rating', 'rating_smooth'], var_name='rating_type', value_name='rating')
+
+    init_plotting()
+    sns.lineplot(
+        data=df,
+        x='episode',
+        y='rating',
+    )
+    plt.title('Elo Rating')
+    plt.savefig(FIGURE_ROOT / 'elo_rating.png')
+    plt.show()
+
+
+def main():
+    # loss_comp()
+    elorating()
 
 
 if __name__ == '__main__':

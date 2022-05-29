@@ -16,12 +16,12 @@ EX_THRES_START = .03
 EX_THRES_END = .95
 EX_THRES_RATE = .005
 
-OFFSET_LAMBDA = -3.
-PACE_EITA = .5
+OFFSET_LAMBDA = -7.8
+PACE_EITA = .13
 LOSS_SCALE = 80
 
 LEARNING_RATE = .003
-MEMORY_CAPACITY = 12000
+MEMORY_CAPACITY = 68000
 
 SAVE_PATH = './models/ddqn-{0}-.pt'
 T_SAVE_PATH = './models/ddqn-target-{0}-.pt'
@@ -46,7 +46,7 @@ class DDQNAgent:
         self.qn_target.load_state_dict(self.qn_policy.state_dict())
         self.qn_target.eval()
 
-        self.optimizer = torch.optim.SGD(
+        self.optimizer = torch.optim.RMSprop(
             self.qn_policy.parameters(),
             lr=LEARNING_RATE,
         )
@@ -61,20 +61,23 @@ class DDQNAgent:
 
     def __threshold_func(self, rate, episode, loss, memory_size) -> float:
         raw_thres = EX_THRES_START + (EX_THRES_END - EX_THRES_START) * (
-            np.tanh(PACE_EITA * len(self.memory) * rate + OFFSET_LAMBDA) + 1) / 2
+            np.tanh(PACE_EITA * memory_size * rate + OFFSET_LAMBDA) + 1) / 2
 
         return min(raw_thres, EX_THRES_END)
 
-    def select_action(self, state, episode=None) -> torch.Tensor:
-        self.threshold = threshold =\
+    def select_action(self, state, episode=None, force_explore=False) -> torch.Tensor:
+        threshold =\
             self.__threshold_func(EX_THRES_RATE, episode,
                                   self.loss, len(self.memory))
 
-        if random.random() < threshold:
+        self.threshold = threshold
+
+        if not force_explore and random.random() < threshold:
             with torch.no_grad():
-                return self.qn_policy(state).argmax()
+                return self.qn_policy(state)
         else:
-            return torch.tensor(random.randrange(self.action_count), dtype=torch.int64, device=self.device)
+            r = random.randrange(self.action_count)
+            return torch.tensor([(1 if i == r else 0) for i in range(self.action_count)], dtype=torch.float64, device=self.device)
 
     def memorize(self, *args):
         self.memory.push(*args)
@@ -130,6 +133,7 @@ class LoadedAgent:
     def select_action(self, state, explore=False) -> torch.Tensor:
         if not explore:
             with torch.no_grad():
-                return self.qn_policy(state).argmax()
+                return self.qn_policy(state)
         else:
-            return torch.tensor(random.randrange(self.action_count), dtype=torch.int64, device=self.device)
+            r = random.randrange(self.action_count)
+            return torch.tensor([(1 if i == r else 0) for i in range(self.action_count)], dtype=torch.float64, device=self.device)
