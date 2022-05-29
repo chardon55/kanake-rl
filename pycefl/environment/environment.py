@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from collections import namedtuple
 from typing import Type
+import numpy as np
 from ..chessboard import BaseChessboard
 from ..actions import ActionSet
 from ..ceil import CEIL
@@ -57,6 +58,10 @@ class Environment:
         state2 = self.__cb.numpy_chessboard.copy() if not done else None
 
         return MDPInfo(state, state2, reward, done, success)
+
+    def update_state(self, state: np.ndarray):
+        if state.shape == self.__cb.numpy_chessboard.shape:
+            self.__cb.cb = state.copy()
 
 
 # class CommonEnvironment:

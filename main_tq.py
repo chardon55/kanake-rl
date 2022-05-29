@@ -132,7 +132,7 @@ def main():
 
         env.reset()
 
-    dt = datetime.now().strftime(r'%Y-%m-%d_%H-%M-%s')
+    dt = datetime.now().strftime(r'%Y-%m-%d_%H-%M-%S')
     print('Saving the models... ', end='')
     agent.save(dt)
 

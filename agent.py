@@ -23,8 +23,8 @@ LOSS_SCALE = 80
 LEARNING_RATE = .003
 MEMORY_CAPACITY = 68000
 
-SAVE_PATH = './models/ddqn-{0}-.pt'
-T_SAVE_PATH = './models/ddqn-target-{0}-.pt'
+SAVE_PATH = './models/ddqn-{0}.pt'
+T_SAVE_PATH = './models/ddqn-target-{0}.pt'
 
 
 class DDQNAgent:
