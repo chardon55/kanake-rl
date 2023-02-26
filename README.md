@@ -4,4 +4,9 @@
 
 Due to the hardware restrictions, the models were very simple (like demos as I said🙊).
 
+Including:
+
+- PyCEFL (Python Chess Environment) (Prototype)
+- CEIL (Chess Environment Interpretation Language) (Prototype)
+
 License: BSD-3-Clause-Clear
