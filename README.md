@@ -14,7 +14,7 @@ License: BSD-3-Clause-Clear
 | Xiangqi | Theory       |
 | Shogi   | Theory       |
 
-Xiangqi and Shogi are upcoming... eventually... right? Right?🙊
+Xiangqi and Shogi are upcoming... eventually... right? Right?😅
 
 ## Including
 
