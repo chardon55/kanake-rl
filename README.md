@@ -8,11 +8,11 @@ License: BSD-3-Clause-Clear
 
 ## Supporting
 
-| Item    | Status       |
-| :------ | :----------- |
-| Chess   | Implemented  |
-| Xiangqi | Theory       |
-| Shogi   | Theory       |
+| Item    | Status                      |
+| :------ | :-------------------------- |
+| Chess   | Fully implemented           |
+| Xiangqi | Partially implemented       |
+| Shogi   | Partially implemented       |
 
 Xiangqi and Shogi are upcoming... eventually... right? Right?😅
 
