@@ -4,15 +4,19 @@
 
 Due to the hardware restrictions, the models were very simple (like demos as I said🙊).
 
-Supporting:
+License: BSD-3-Clause-Clear
 
-- Chess (Current)
-- Xiangqi (Upcoming... eventually... (right?😅))
-- Shogi (Upcoming... eventually... (right?😅))
+## Supporting
 
-Including:
+| Item    | Status       |
+| :------ | :----------- |
+| Chess   | Implemented  |
+| Xiangqi | Theory       |
+| Shogi   | Theory       |
+
+Xiangqi and Shogi are upcoming... eventually... right? Right?🙊
+
+## Including
 
 - PyCEFL (Python Chess Environment) (Prototype)
 - CEIL (Chess Environment Interpretation Language) (Prototype)
-
-License: BSD-3-Clause-Clear
