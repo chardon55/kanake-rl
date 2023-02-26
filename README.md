@@ -4,6 +4,12 @@
 
 Due to the hardware restrictions, the models were very simple (like demos as I said🙊).
 
+Supporting:
+
+- Chess (Current)
+- Xiangqi (Upcoming... eventually... (right?😅))
+- Shogi (Upcoming... eventually... (right?😅))
+
 Including:
 
 - PyCEFL (Python Chess Environment) (Prototype)
